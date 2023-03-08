@@ -28,18 +28,25 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
+      
+    - name: Extract branch name
+      shell: bash
+      run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+      id: branch_name
 
+    - name: Extract sha in a short form
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      id: sha_short
+      
     - name: Build and push image to ECR
       id: build-and-push
       env:
-          ECR_REPO_URI: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}
-          IMAGE_TAG_LATEST: latest
-          IMAGE_TAG_COMMIT_SHA: $(git rev-parse --short "$GITHUB_SHA")
-          IMAGE_TAG_BRANCH: ${GITHUB_REF#refs/heads/}
-      run:
-          docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }} -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG_BRANCH }}-${{ env.IMAGE_TAG_COMMIT_SHA }} .
-          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }} ${{ env.ECR_REPO_URI }}:${{ env.IMAGE_TAG_LATEST }}
-          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG_BRANCH }}-${{ env.IMAGE_TAG_COMMIT_SHA }} ${{ env.ECR_REPO_URI }}:${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG_BRANCH }}-${{ env.IMAGE_TAG_COMMIT_SHA }}
-          docker push ${{ env.ECR_REPO_URI }}:${{ env.IMAGE_TAG_LATEST }}
-          docker push ${{ env.ECR_REPO_URI }}:${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG_BRANCH }}-${{ env.IMAGE_TAG_COMMIT_SHA }}
+          ECR_REPOSITORY: whist-exam-app
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          FULL_IMAGE: ${{ steps.branch_name.outputs.branch }}-${{ steps.sha_short.outputs.sha_short}}
+      run: |
+       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_REPOSITORY-$FULL_IMAGE .
+       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_REPOSITORY-$FULL_IMAGE
+       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
