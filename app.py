@@ -7,9 +7,9 @@ import socket
 
 log_dir = '/app/logs'
 
-container_name = os.environ['HOSTNAME']
+# container_name = os.environ['HOSTNAME']
 
-logging.basicConfig(filename=f'{log_dir}/{container_name}.log',
+logging.basicConfig(filename=f'app.log',
                     level=logging.DEBUG)
 
 app = Flask(__name__)
