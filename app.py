@@ -15,9 +15,9 @@ logging.basicConfig(filename=f'{log_dir}/{container_name}.log',
 app = Flask(__name__)
 
 DATABASE_CONFIG = {
-    'host': "db",
-    'user': "root",
-    'password': "password",
+    'host': "whist-db.coow8klldjgb.us-east-1.rds.amazonaws.com",
+    'user': "admin",
+    'password': "adminpassword",
     'database': "access_log"
 }
 counter = 0
