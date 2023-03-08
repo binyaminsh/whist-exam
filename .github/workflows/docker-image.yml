@@ -16,25 +16,27 @@ jobs:
     name: Push to ECR
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-      - name: Login to ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          registry: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - name: configure aws cred
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build and push image to ECR
-        id: build-and-push
-        env:
+    - name: Build and push image to ECR
+      id: build-and-push
+      env:
           ECR_REPO_URI: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}
           IMAGE_TAG_LATEST: latest
           IMAGE_TAG_COMMIT_SHA: ${{ github.sha }}
           IMAGE_TAG_BRANCH: ${{ github.ref }}
-        run: |
+      run:
           docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }} -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG_BRANCH }}-${{ env.IMAGE_TAG_COMMIT_SHA }} .
           docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }} ${{ env.ECR_REPO_URI }}:${{ env.IMAGE_TAG_LATEST }}
           docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG_BRANCH }}-${{ env.IMAGE_TAG_COMMIT_SHA }} ${{ env.ECR_REPO_URI }}:${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG_BRANCH }}-${{ env.IMAGE_TAG_COMMIT_SHA }}
