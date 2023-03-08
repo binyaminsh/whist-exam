@@ -18,7 +18,7 @@ DATABASE_CONFIG = {
     'host': "whist-db.coow8klldjgb.us-east-1.rds.amazonaws.com",
     'user': "admin",
     'password': "adminpassword",
-    'database': "access_log"
+    'database': "whist-db"
 }
 counter = 0
 # connecting to db
