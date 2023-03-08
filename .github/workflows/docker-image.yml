@@ -7,6 +7,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 930354804502
   ECR_REPO: whist-exam-app
   IMAGE_NAME: app
 
