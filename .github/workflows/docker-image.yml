@@ -34,8 +34,8 @@ jobs:
       env:
           ECR_REPO_URI: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}
           IMAGE_TAG_LATEST: latest
-          IMAGE_TAG_COMMIT_SHA: ${{ github.sha }}
-          IMAGE_TAG_BRANCH: ${{ github.ref }}
+          IMAGE_TAG_COMMIT_SHA: $(git rev-parse --short "$GITHUB_SHA")
+          IMAGE_TAG_BRANCH: ${GITHUB_REF#refs/heads/}
       run:
           docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }} -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG_BRANCH }}-${{ env.IMAGE_TAG_COMMIT_SHA }} .
           docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }} ${{ env.ECR_REPO_URI }}:${{ env.IMAGE_TAG_LATEST }}
